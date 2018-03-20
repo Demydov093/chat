@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+
+    <style>
+        body, html {
+            margin: 0;
+            color: green;
+            font-family: Roboto, sans-serif;
+            font-weight: 400;
+        }
+        .chat {
+            width: 100%;
+        }
+        .chat__list{
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .chat__list-item {
+            padding: 5px;
+            font-size: 16px;
+
+        }
+        .chat__list-item:nth-child(odd) {
+            background: #fafafa;
+        }
+        .chat__input {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid dimgrey;
+            font-size: 18px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="chat">
+        <ul class="chat__list">
+            <li class="chat__list-item" v-for="message in messages" track-by="$index">{{ message }}</li>
+        </ul>
+        <input type="text" class="chat__input" placeholder="Type... " v-model="message" v-on:keydown="send">
+    </div>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+
+    <script>
+        var socket = io();
+
+        new Vue({
+            el: '.chat',
+
+            data: {
+                message: '',
+                messages: []
+            },
+            methods: {
+                send: function (e) {
+                    if (e.keyCode !== 13) {
+                        return;
+                    }
+                    socket.emit('message.send', this.message);
+                    this.message = '';
+                }
+            },
+            mounted: function () {
+                socket.on('message', function(message) {
+                    console.log(11, message);
+                    this.messages.push(message);
+                }.bind(this));
+            }
+
+        });
+    </script>
+</body>
+</html>
